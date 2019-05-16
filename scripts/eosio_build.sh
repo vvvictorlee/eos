@@ -260,7 +260,8 @@ elif $NO_CPP17; then
       CC_COMP=${OPT_LOCATION}/clang8/bin/clang
    else
       printf "Error no C++17 support.\\nEnter Y/y or N/n to continue with downloading and building a viable compiler or exit now.\\nIf you already have a C++17 compiler installed or would like to install your own, export CXX to point to the compiler of your choosing."
-      read -p "Enter Y/y or N/n to continue with downloading and building a viable compiler or exit now. " yn
+      #read -p "Enter Y/y or N/n to continue with downloading and building a viable compiler or exit now. " yn
+      yn=Y
       case $yn in
          [Yy]* ) BUILD_CLANG8=true; CPP_COMP=${OPT_LOCATION}/clang8/bin/clang++; CC_COMP=${OPT_LOCATION}/clang8/bin/clang; break;;
          [Nn]* ) exit 1;;
