@@ -1,5 +1,5 @@
 FROM ubuntu:18.04
-ARG branch=laomao/v1.8.0-rc1-blacklist-plugin
+ARG branch=laomao/v1.8.0-rc2-blacklist-plugin
 
 RUN apt-get update && apt-get -y install sudo openssl git ca-certificates vim&& rm -rf /var/lib/apt/lists/*
 RUN git clone -b $branch https://github.com/EOSLaoMao/eos.git --recursive
