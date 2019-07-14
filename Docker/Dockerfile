@@ -7,7 +7,7 @@ RUN git clone -b $branch https://github.com/EOSLaoMao/eos.git --recursive
 
 WORKDIR /eos
 RUN git remote update
-RUN ./scripts/eosio_build.sh -s EOS c-y -P \
+RUN ./scripts/eosio_build.sh -s EOS -y -P \
 RUN ./scripts/eosio_install.sh
 
 
