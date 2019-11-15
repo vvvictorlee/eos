@@ -13,7 +13,7 @@ RUN ./scripts/eosio_install.sh
 
 FROM ubuntu:18.04
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install libusb-1.0-0 libcurl3-gnutls openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install vim libusb-1.0-0 libcurl3-gnutls openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /usr/local/lib/* /usr/local/lib/
 COPY --from=builder /eos/build/bin /opt/eosio/bin
 ENV EOSIO_ROOT=/opt/eosio
