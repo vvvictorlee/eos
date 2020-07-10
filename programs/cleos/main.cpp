@@ -478,6 +478,7 @@ void print_action( const fc::variant& at ) {
    auto func = act["name"].as_string();
    auto args = fc::json::to_string( act["data"], fc::time_point::maximum() );
    auto console = at["console"].as_string();
+   auto return_value = at["return_value"].as_string();
 
    /*
    if( code == "eosio" && func == "setcode" )
@@ -487,6 +488,9 @@ void print_action( const fc::variant& at ) {
    */
    if( args.size() > 100 ) args = args.substr(0,100) + "...";
    cout << "#" << std::setw(14) << right << receiver << " <= " << std::setw(28) << std::left << (code +"::" + func) << " " << args << "\n";
+   if ( return_value.size())  {
+      cout << std::setw(28) << std::left << "=>" << "return value: " << return_value << "\n";
+   }
    if( console.size() ) {
       std::stringstream ss(console);
       string line;
@@ -1143,7 +1147,7 @@ struct create_account_subcommand {
 
             if( active_key_str.empty() ) {
                active = owner;
-            } else if ( active_key_str.find('{') != string::npos ) { 
+            } else if ( active_key_str.find('{') != string::npos ) {
                try{
                   active = parse_json_authority_or_key(active_key_str);
                } EOS_RETHROW_EXCEPTIONS( explained_exception, "Invalid active authority: ${authority}", ("authority", owner_key_str) )
@@ -2628,7 +2632,7 @@ int main( int argc, char** argv ) {
    });
 
    // validate subcommand
-   auto validate = app.add_subcommand("validate", localized("Validate transactions")); 
+   auto validate = app.add_subcommand("validate", localized("Validate transactions"));
    validate->require_subcommand();
 
    // validate signatures
@@ -3529,6 +3533,9 @@ int main( int argc, char** argv ) {
    actionsSubcommand->add_option("action", action,
                                  localized("A JSON string or filename defining the action to execute on the contract"), true)->required();
    actionsSubcommand->add_option("data", data, localized("The arguments to the contract"))->required();
+
+   bool print_return_value = false;
+   actionsSubcommand->add_flag("-v,--return_value", print_return_value, localized("Print action's return value"));
 
    add_standard_transaction_options_plus_signing(actionsSubcommand);
    actionsSubcommand->callback([&] {
