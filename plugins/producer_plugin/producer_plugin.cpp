@@ -1418,11 +1418,16 @@ producer_plugin_impl::start_block_result producer_plugin_impl::start_block() {
 
    if (_pending_block_mode == pending_block_mode::producing) {
       const auto start_block_time = block_time - fc::microseconds( config::block_interval_us );
+      const auto size = _unapplied_transactions.size();
+      const auto incoming_size = _unapplied_transactions.incoming_size();
       if( now < start_block_time ) {
          fc_dlog(_log, "Not producing block waiting for production window ${n} ${bt}", ("n", hbs->block_num + 1)("bt", block_time) );
+         fc_dlog(_log, "REMOVE Not producing waiting, size=${size}, incoming_size=${is}", ("size", size)("incoming_size", incoming_size));
          // start_block_time instead of block_time because schedule_delayed_production_loop calculates next block time from given time
          schedule_delayed_production_loop(weak_from_this(), calculate_producer_wake_up_time(start_block_time));
          return start_block_result::waiting_for_production;
+      } else {
+         fc_dlog(_log, "REMOVE Possibly producing (not waiting), size=${size}, incoming_size=${is}", ("size", size)("incoming_size", incoming_size));
       }
    } else if (previous_pending_mode == pending_block_mode::producing) {
       // just produced our last block of our round
@@ -1513,6 +1518,9 @@ producer_plugin_impl::start_block_result producer_plugin_impl::start_block() {
 
          // limit execution of pending incoming to once per block
          size_t pending_incoming_process_limit = _unapplied_transactions.incoming_size();
+
+         fc_dlog(_log, "REMOVE pending_incoming_process_limit=${n}",
+                 ("n", pending_incoming_process_limit));
 
          if( !process_unapplied_trxs( preprocess_deadline ) )
             return start_block_result::exhausted;
@@ -1792,6 +1800,10 @@ void producer_plugin_impl::process_scheduled_and_incoming_trxs( const fc::time_p
       fc_dlog( _log,
                "Processed ${m} of ${n} scheduled transactions, Applied ${applied}, Failed/Dropped ${failed}",
                ( "m", num_processed )( "n", scheduled_trxs_size )( "applied", num_applied )( "failed", num_failed ) );
+   } else {
+      fc_dlog( _log,
+               "REMOVE Processed ${m}, Applied ${applied}, Failed/Dropped ${failed}",
+               ( "m", num_processed )( "applied", num_applied )( "failed", num_failed ) );
    }
 }
 
