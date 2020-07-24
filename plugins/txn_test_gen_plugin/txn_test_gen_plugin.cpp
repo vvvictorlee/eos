@@ -320,13 +320,17 @@ struct txn_test_gen_plugin_impl {
 
    void arm_timer(boost::asio::high_resolution_timer::time_point s) {
       const auto now = fc::time_point::now().time_since_epoch();
+      static unsigned REMOVE_timer_count = 0;
+      ++REMOVE_timer_count;
       if (now >= report_batch) {
          report_batch = fc::time_point::now().time_since_epoch() + fc::seconds(1);
          ilog("Generated ${new_trans} transactions (${trans} total) in ${batches} batches.",
               ("new_trans", total_trans - last_total_trans)
               ("trans", total_trans)
               ("batches", num_batches));
+         ilog("REMOVE timer_count=${tc}",("tc",REMOVE_timer_count));
          last_total_trans = total_trans;
+         REMOVE_timer_count = 0;
       }
       timer->expires_at(s + std::chrono::milliseconds(timer_timeout));
       boost::asio::post( thread_pool->get_executor(), [this]() {
@@ -401,6 +405,7 @@ struct txn_test_gen_plugin_impl {
       }
 
       ++num_batches;
+      ilog("REMOVE pushing ${s} transactions, batch=${b}", ("s", trxs.size())("b", batch));
       push_transactions(std::move(trxs), next);
    }
 
