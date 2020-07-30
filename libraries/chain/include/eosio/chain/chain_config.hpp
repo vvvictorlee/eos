@@ -133,6 +133,10 @@ struct chain_config_v1 : chain_config_v0 {
       return !(lhs == rhs);
    }
 
+   friend inline bool operator != ( const chain_config_v1& lhs, const chain_config_v1& rhs ) {
+      return !(lhs == rhs);
+   }
+
    inline chain_config_v1& operator= (const Base& b) {
       Base::operator= (b);
       return *this;
@@ -167,6 +171,22 @@ DEFINE_ENUM(chain_config_v0, CHAIN_CONFIG_V0_MEMBERS())
 
 //uncomment after adding 1st member to v1 config
 //DEFINE_ENUM_DERIVED(chain_config_v0, chain_config_v1, CHAIN_CONFIG_V1_MEMBERS())
+
+#define CHAIN_CONFIG_V0_MEMBERS()\
+            (max_block_net_usage)(target_block_net_usage_pct)\
+            (max_transaction_net_usage)(base_per_transaction_net_usage)(net_usage_leeway)\
+            (context_free_discount_net_usage_num)(context_free_discount_net_usage_den)\
+            (max_block_cpu_usage)(target_block_cpu_usage_pct)\
+            (max_transaction_cpu_usage)(min_transaction_cpu_usage)\
+            (max_transaction_lifetime)(deferred_trx_expiration_window)(max_transaction_delay)\
+            (max_inline_action_size)(max_inline_action_depth)(max_authority_depth)
+
+SELECTION_MAP(chain_config_v0, CHAIN_CONFIG_V0_MEMBERS())
+
+#define CHAIN_CONFIG_V1_MEMBERS()\
+            (action_return_value_size_limit)
+
+SELECTION_MAP_DERIVED(chain_config_v0, chain_config_v1, CHAIN_CONFIG_V1_MEMBERS())
 
 } } // namespace eosio::chain
 
