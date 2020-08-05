@@ -53,8 +53,6 @@ const std::vector<const char*> genesis_intrinsics = {
    "set_proposed_producers",
    "get_blockchain_parameters_packed",
    "set_blockchain_parameters_packed",
-   "get_parameters_packed",
-   "set_parameters_packed",
    "is_privileged",
    "set_privileged",
    "get_active_producers",
