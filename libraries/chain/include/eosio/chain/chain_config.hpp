@@ -110,7 +110,7 @@ struct chain_config_v0 {
 
 struct chain_config_v1 : chain_config_v0 {
    using Base = chain_config_v0;
-   std::uint32_t action_return_value_size_limit = MAX_SIZE_OF_BYTE_ARRAYS;
+   //add parameters here:
 
    inline const Base& base() const {
       return static_cast<const Base&>(*this);
@@ -120,13 +120,13 @@ struct chain_config_v1 : chain_config_v0 {
 
    template<typename Stream>
    friend Stream& operator << ( Stream& out, const chain_config_v1& c ) {
-      return out << c.base() << "Action Return Value Size = " << c.action_return_value_size_limit << "\n";
+      //add v1 parameters output here
+      return out << c.base();
    }
 
    friend inline bool operator == ( const chain_config_v1& lhs, const chain_config_v1& rhs ) {
-      return lhs.base() == rhs.base() &&
-             std::tie(lhs.action_return_value_size_limit) ==
-             std::tie(rhs.action_return_value_size_limit);
+      //add v1 parameters comarison here
+      return lhs.base() == rhs.base();
    }
 
    friend inline bool operator != ( const chain_config_v1& lhs, const chain_config_v1& rhs ) {
@@ -139,7 +139,8 @@ struct chain_config_v1 : chain_config_v0 {
    }
 };
 
-using chain_config = chain_config_v1;
+//after adding 1st value to chain_config_v1 change this using to point to v1
+using chain_config = chain_config_v0;
 
 class controller;
 
@@ -160,22 +161,28 @@ struct config_entry_validator{
 
 DEFINE_ENUM(chain_config_v0, CHAIN_CONFIG_V0_MEMBERS())
 
+//add new v1 members here. order is important
 #define CHAIN_CONFIG_V1_MEMBERS()\
-            (action_return_value_size_limit)
+            ()
 
-DEFINE_ENUM_DERIVED(chain_config_v0, chain_config_v1, CHAIN_CONFIG_V1_MEMBERS())
+//uncomment after adding 1st member to v1 config
+//DEFINE_ENUM_DERIVED(chain_config_v0, chain_config_v1, CHAIN_CONFIG_V1_MEMBERS())
 
 } } // namespace eosio::chain
 
 FC_REFLECT(eosio::chain::chain_config_v0, CHAIN_CONFIG_V0_MEMBERS())
-FC_REFLECT_DERIVED(eosio::chain::chain_config_v1, (eosio::chain::chain_config_v0), CHAIN_CONFIG_V1_MEMBERS())
+//uncomment after adding 1st member to v1 config
+//FC_REFLECT_DERIVED(eosio::chain::chain_config_v1, (eosio::chain::chain_config_v0), CHAIN_CONFIG_V1_MEMBERS())
+
 
 namespace fc {
 
 RANGE_PACK(eosio::chain::chain_config_v0, CHAIN_CONFIG_V0_MEMBERS())
 RANGE_UNPACK(eosio::chain::chain_config_v0, CHAIN_CONFIG_V0_MEMBERS())
-RANGE_PACK(eosio::chain::chain_config_v1, CHAIN_CONFIG_V1_MEMBERS())
-RANGE_UNPACK(eosio::chain::chain_config_v1, CHAIN_CONFIG_V1_MEMBERS())
+//uncomment after adding 1st member to v1 config
+//RANGE_PACK(eosio::chain::chain_config_v1, CHAIN_CONFIG_V1_MEMBERS())
+//RANGE_UNPACK(eosio::chain::chain_config_v1, CHAIN_CONFIG_V1_MEMBERS())
+
 
 /**
  * Packed config stream is in the following format:

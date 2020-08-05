@@ -41,14 +41,12 @@ namespace eosio { namespace chain {
 
 void chain_config_v1::validate() const {
    chain_config_v0::validate();
-   EOS_ASSERT( action_return_value_size_limit <= MAX_SIZE_OF_BYTE_ARRAYS, action_validate_exception,
-               "action return value size limit must be less or equal to ${value}", ("value", MAX_SIZE_OF_BYTE_ARRAYS));
+   //add validation on new v1 parameters here
 }
 
 bool config_entry_validator::operator()(uint32_t id) const {
    switch(id){
-      case field_id<&chain_config_v1::action_return_value_size_limit>():
-      return control.is_builtin_activated(builtin_protocol_feature_t::action_return_value);
+      //add v1 checks for builtin here if needed
       default:
       return true;
    }
