@@ -139,11 +139,11 @@ template<typename T, typename Validator>
 struct data_range {
 
    T& config;
-   vector<uint32_t> ids;
+   vector<fc::unsigned_int> ids;
    Validator validator;
 
    data_range(T& c, Validator val) : config(c), validator(val){}
-   data_range(T& c, vector<uint32_t>&& id_list, const Validator& val) 
+   data_range(T& c, vector<fc::unsigned_int>&& id_list, const Validator& val) 
       : data_range(c, val){
       ids = std::move(id_list);
    }

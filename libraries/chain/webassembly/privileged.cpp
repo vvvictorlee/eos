@@ -228,10 +228,9 @@ namespace eosio { namespace chain { namespace webassembly {
       datastream<const char*> ds_ids( packed_parameter_ids.data(), packed_parameter_ids.size() );
 
       chain::chain_config cfg = context.control.get_global_properties().configuration;
-      using data_range = chain::data_range<chain::chain_config, chain::config_entry_validator>;
-      std::vector<uint32_t> ids;
+      std::vector<fc::unsigned_int> ids;
       fc::raw::unpack(ds_ids, ids);
-      const data_range config_range(cfg, std::move(ids), chain::config_entry_validator{context.control});
+      const config_range config_range(cfg, std::move(ids), {context.control});
       
       auto size = fc::raw::pack_size( config_range );
       if( packed_parameters.size() == 0 ) return size;
@@ -249,8 +248,7 @@ namespace eosio { namespace chain { namespace webassembly {
       datastream<const char*> ds( packed_parameters.data(), packed_parameters.size() );
 
       chain::chain_config cfg = context.control.get_global_properties().configuration;
-      using data_range = chain::data_range<chain::chain_config, chain::config_entry_validator>;
-      data_range config_range(cfg, chain::config_entry_validator{context.control});
+      config_range config_range(cfg, {context.control});
 
       fc::raw::unpack(ds, config_range);
       

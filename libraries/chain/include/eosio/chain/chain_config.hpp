@@ -39,9 +39,7 @@ struct chain_config_v0 {
    inline const chain_config_v0& v0() const {
       return *this;
    }
-
-   //chain_config_v0& operator = (const chain_config_v0& rhs) = default;
-
+   
    template<typename Stream>
    friend Stream& operator << ( Stream& out, const chain_config_v0& c ) {
       return out << "Max Block Net Usage: " << c.max_block_net_usage << ", "
@@ -143,9 +141,6 @@ struct chain_config_v1 : chain_config_v0 {
    }
 };
 
-//after adding 1st value to chain_config_v1 change this using to point to v1
-using chain_config = chain_config_v0;
-
 class controller;
 
 struct config_entry_validator{
@@ -153,6 +148,10 @@ struct config_entry_validator{
 
    bool operator()(uint32_t id) const;
 };
+
+//after adding 1st value to chain_config_v1 change this using to point to v1
+using chain_config = chain_config_v0;
+using config_range = data_range<chain_config, config_entry_validator>;
 
 #define CHAIN_CONFIG_V0_MEMBERS()\
             (max_block_net_usage)(target_block_net_usage_pct)\
@@ -202,7 +201,8 @@ inline DataStream& operator<<( DataStream& s, const eosio::chain::data_range<T, 
 
    //vector here serves as hash map where key is always an index
    std::vector<bool> visited(enum_size<T>(), false);
-   for (auto id : selection.ids){
+   for (auto uid : selection.ids){
+      uint32_t id = uid;
       EOS_ASSERT(id < visited.size(), config_parse_error, "provided id ${id} should be less than ${size}", ("id", id)("size", visited.size()));
       EOS_ASSERT(!visited[id], config_parse_error, "duplicate id provided: ${id}", ("id", id));
       visited[id] = true;
