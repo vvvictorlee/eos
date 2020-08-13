@@ -131,10 +131,6 @@ struct chain_config_v1 : chain_config_v0 {
       return !(lhs == rhs);
    }
 
-   friend inline bool operator != ( const chain_config_v1& lhs, const chain_config_v1& rhs ) {
-      return !(lhs == rhs);
-   }
-
    inline chain_config_v1& operator= (const Base& b) {
       Base::operator= (b);
       return *this;
