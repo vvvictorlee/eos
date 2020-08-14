@@ -310,8 +310,6 @@ namespace eosio { namespace chain {
                                     3050011, "eosio_assert_code assertion failure uses restricted error code value" )
       FC_DECLARE_DERIVED_EXCEPTION( inline_action_too_big_nonprivileged, action_validate_exception,
                                     3050012, "Inline action exceeds maximum size limit for a non-privileged account" )
-      FC_DECLARE_DERIVED_EXCEPTION( unauthorized_disk_usage_increase, action_validate_exception,
-                                    3050013, "Action attempts to increase disk usage of account without authorization" )
 
    FC_DECLARE_DERIVED_EXCEPTION( database_exception, chain_exception,
                                  3060000, "Database exception" )
@@ -524,6 +522,9 @@ namespace eosio { namespace chain {
                                     3015016, "ABI has an unsupported version" )
       FC_DECLARE_DERIVED_EXCEPTION( duplicate_abi_action_results_def_exception,  abi_exception,
                                     3015017, "Duplicate action results definition in the ABI" )
+      FC_DECLARE_DERIVED_EXCEPTION( duplicate_abi_kv_table_def_exception,  abi_exception,
+                                    3015018, "Duplicate kv_table definition in the ABI" )
+
 
    FC_DECLARE_DERIVED_EXCEPTION( contract_exception,           chain_exception,
                                  3160000, "Contract exception" )

@@ -6,6 +6,7 @@ namespace eosio { namespace chain {
 
 using type_name      = string;
 using field_name     = string;
+using index_name = name;
 
 struct type_def {
    type_def() = default;
@@ -70,6 +71,34 @@ struct table_def {
    type_name          type;        // type of binary data stored in this table
 };
 
+struct index_def
+{
+   index_def() = default;
+   index_def(const index_name &name, const type_name &type)
+       : name(name), type(type)
+   {}
+
+   index_name name;
+   type_name  type;
+
+   bool operator==(const index_def &other) const
+   {
+      return std::tie(name, type) == std::tie(other.name, other.type);
+   }
+};
+
+struct kv_table_def {
+   kv_table_def() = default;
+   kv_table_def(const type_name& name, const type_name& type, const index_def& primary_index, const map<index_name, index_def>& secondary_indices)
+   :name(name), type(type), primary_index(primary_index)//, secondary_indices(secondary_indices)
+   {}
+
+   table_name                    name;                // the name of the table
+   type_name                     type;                // the name of the struct
+   index_def                     primary_index;       // primary index field
+   map<index_name, index_def>    secondary_indices;   // secondary indices fields
+};
+
 struct clause_pair {
    clause_pair() = default;
    clause_pair( const string& id, const string& body )
@@ -112,11 +141,12 @@ struct may_not_exist {
 
 struct abi_def {
    abi_def() = default;
-   abi_def(const vector<type_def>& types, const vector<struct_def>& structs, const vector<action_def>& actions, const vector<table_def>& tables, const vector<clause_pair>& clauses, const vector<error_message>& error_msgs)
+   abi_def(const vector<type_def>& types, const vector<struct_def>& structs, const vector<action_def>& actions, const vector<table_def>& tables, const map<table_name, kv_table_def>& kv_tables, const vector<clause_pair>& clauses, const vector<error_message>& error_msgs)
    :types(types)
    ,structs(structs)
    ,actions(actions)
    ,tables(tables)
+   ,kv_tables(kv_tables)
    ,ricardian_clauses(clauses)
    ,error_messages(error_msgs)
    {}
@@ -126,6 +156,7 @@ struct abi_def {
    vector<struct_def>                        structs;
    vector<action_def>                        actions;
    vector<table_def>                         tables;
+   map<table_name, kv_table_def>             kv_tables;
    vector<clause_pair>                       ricardian_clauses;
    vector<error_message>                     error_messages;
    extensions_type                           abi_extensions;
@@ -164,6 +195,33 @@ template<typename T>
 void from_variant(const fc::variant& v, eosio::chain::may_not_exist<T>& e) {
    from_variant( v, e.value );
 }
+/*
+std::ostream& operator << (std::ostream& s, const eosio::chain::kv_table_def& v) {
+   //raw::pack(s, v.value);
+   return s;
+}
+
+std::ostream& operator >> (std::ostream& s, eosio::chain::kv_table_def& v) {
+//   if (s.remaining())
+//      raw::unpack(s, v.value);
+   return s;
+}
+*/
+/*
+template<>
+inline void to_variant<std::vector<eosio::chain::kv_table_def>>(const std::vector<eosio::chain::kv_table_def> &e, fc::variant &v)
+{
+   //to_variant( e.value, v);
+   std::cout << "to_variant kv_table_def" << std::endl;
+}
+
+template <>
+inline void from_variant<std::vector<eosio::chain::kv_table_def>>(const fc::variant &v, std::vector<eosio::chain::kv_table_def> &e)
+{
+   //from_variant( v, e.value );
+   std::cout << "from_variant kv_table_def" << std::endl;
+}
+*/
 
 } // namespace fc
 
@@ -172,9 +230,11 @@ FC_REFLECT( eosio::chain::field_def                        , (name)(type) )
 FC_REFLECT( eosio::chain::struct_def                       , (name)(base)(fields) )
 FC_REFLECT( eosio::chain::action_def                       , (name)(type)(ricardian_contract) )
 FC_REFLECT( eosio::chain::table_def                        , (name)(index_type)(key_names)(key_types)(type) )
+FC_REFLECT(eosio::chain::index_def                         , (name)(type) )
+FC_REFLECT( eosio::chain::kv_table_def                     , (name)(type)(primary_index)(secondary_indices) )
 FC_REFLECT( eosio::chain::clause_pair                      , (id)(body) )
 FC_REFLECT( eosio::chain::error_message                    , (error_code)(error_msg) )
 FC_REFLECT( eosio::chain::variant_def                      , (name)(types) )
 FC_REFLECT( eosio::chain::action_result_def                , (name)(result_type) )
-FC_REFLECT( eosio::chain::abi_def                          , (version)(types)(structs)(actions)(tables)
+FC_REFLECT( eosio::chain::abi_def                          , (version)(types)(structs)(actions)(tables)(kv_tables)
                                                              (ricardian_clauses)(error_messages)(abi_extensions)(variants)(action_results) )
