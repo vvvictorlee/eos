@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(setabi_test)
         "kv_tables": {"kvtable1": {
             "type": "kvaccount1",
             "primary_index": {"name": "pid1", "type": "name"},
-            "secondary_index": {"sid1": {"type": "string"}}
+            "secondary_indices": {"sid1": {"type": "string"}}
            }},
        "ricardian_clausecds": [],
        "abi_extensions": []
