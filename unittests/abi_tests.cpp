@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(setabi_test)
             "primary_index": {"name": "pid1", "type": "name"},
             "secondary_indices": {"sid1": {"type": "string"}}
            }},
-       "ricardian_clausecds": [],
+       "ricardian_clauses": [],
        "abi_extensions": []
       }
    )=====";
