@@ -16,17 +16,11 @@ using namespace eosio;
 class [[eosio::contract]] kv_bios : eosio::contract {
  public:
    using contract::contract;
-   [[eosio::action]] void setdisklimit(name account, int64_t limit) {
-      set_resource_limit(account.value, "disk"_n.value, limit);
-   }
    [[eosio::action]] void setramlimit(name account, int64_t limit) {
       set_resource_limit(account.value, "ram"_n.value, limit);
    }
    [[eosio::action]] void ramkvlimits(uint32_t k, uint32_t v, uint32_t i) {
       kvlimits_impl("eosio.kvram"_n, k, v, i);
-   }
-   [[eosio::action]] void diskkvlimits(uint32_t k, uint32_t v, uint32_t i) {
-      kvlimits_impl("eosio.kvdisk"_n, k, v, i);
    }
    void kvlimits_impl(name db, uint32_t k, uint32_t v, uint32_t i) {
       uint32_t limits[4];

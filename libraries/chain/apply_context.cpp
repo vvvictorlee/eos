@@ -1254,16 +1254,6 @@ void apply_context::add_ram_usage( account_name account, int64_t ram_delta, cons
    }
 }
 
-void apply_context::add_disk_usage( account_name payer, int64_t disk_delta, const storage_usage_trace& trace ) {
-
-   trx_context.add_disk_usage( payer, disk_delta, trace );
-
-   auto p = _account_disk_deltas.emplace( payer, disk_delta );
-   if( !p.second ) {
-      p.first->delta += disk_delta;
-   }
-}
-
 action_name apply_context::get_sender() const {
    const action_trace& trace = trx_context.get_action_trace( action_ordinal );
    if (trace.creator_action_ordinal > 0) {

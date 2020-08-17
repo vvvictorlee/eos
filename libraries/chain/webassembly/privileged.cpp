@@ -45,7 +45,7 @@ namespace eosio { namespace chain { namespace webassembly {
     * update a single resource limit associated with an account.
     *
     * @param account - the account whose limits are being modified
-    * @param resource - the resource to update, which should be either ram, disk, cpu, or net.
+    * @param resource - the resource to update, which should be either ram, cpu, or net.
     * @param limit - the new limit.  A value of -1 means unlimited.
     *
     * @pre limit >= -1
@@ -67,10 +67,6 @@ namespace eosio { namespace chain { namespace webassembly {
          int64_t ram, net, cpu;
          manager.get_account_limits(account, ram, net, cpu);
          manager.set_account_limits( account, ram, net, limit );
-      } else if( resource == string_to_name("disk") ) {
-         if( manager.set_account_disk_limit( account, limit ) ) {
-            context.trx_context.validate_disk_usage.insert( account );
-         }
       } else {
          EOS_THROW(wasm_execution_error, "unknown resource ${resource}", ("resource", resource));
       }
@@ -90,8 +86,6 @@ namespace eosio { namespace chain { namespace webassembly {
          int64_t ram, net, cpu;
          manager.get_account_limits( account, ram, net, cpu );
          return cpu;
-      } else if( resource == string_to_name("disk") ) {
-         return manager.get_account_disk_limit( account );
       } else {
          EOS_THROW(wasm_execution_error, "unknown resource ${resource}", ("resource", resource));
       }

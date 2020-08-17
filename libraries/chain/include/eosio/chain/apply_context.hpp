@@ -590,8 +590,6 @@ class apply_context {
          return *kv_backing_store;
       }
 
-      void add_disk_usage( account_name account, int64_t disk_delta, const storage_usage_trace& trace );
-
    private:
       kv_context& kv_get_db(uint64_t db);
       void kv_check_iterator(uint32_t itr);
