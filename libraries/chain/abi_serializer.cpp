@@ -159,8 +159,8 @@ namespace eosio { namespace chain {
       for( const auto& t : abi.tables )
          tables[t.name] = t.type;
 
-      //for( const auto& kt : abi.kv_tables )
-      //   kv_tables[kt.first] = kt.second;
+      for( const auto& kt : abi.kv_tables.value )
+         kv_tables[kt.first] = kt.second;
 
       for( const auto& e : abi.error_messages )
          error_messages[e.error_code] = e.error_msg;
@@ -179,7 +179,7 @@ namespace eosio { namespace chain {
       EOS_ASSERT( structs.size() == abi.structs.size(), duplicate_abi_struct_def_exception, "duplicate struct definition detected" );
       EOS_ASSERT( actions.size() == abi.actions.size(), duplicate_abi_action_def_exception, "duplicate action definition detected" );
       EOS_ASSERT( tables.size() == abi.tables.size(), duplicate_abi_table_def_exception, "duplicate table definition detected" );
-      EOS_ASSERT( kv_tables.size() == abi.kv_tables.size(), duplicate_abi_kv_table_def_exception, "duplicate table definition detected" );
+      EOS_ASSERT( kv_tables.size() == abi.kv_tables.value.size(), duplicate_abi_kv_table_def_exception, "duplicate table definition detected" );
       EOS_ASSERT( error_messages.size() == abi.error_messages.size(), duplicate_abi_err_msg_def_exception, "duplicate error message definition detected" );
       EOS_ASSERT( variants.size() == abi.variants.value.size(), duplicate_abi_variant_def_exception, "duplicate variant definition detected" );
       EOS_ASSERT( action_results.size() == abi.action_results.value.size(), duplicate_abi_action_results_def_exception, "duplicate action results definition detected" );

@@ -111,11 +111,27 @@ BOOST_AUTO_TEST_CASE(setabi_test)
         "structs": [],
         "actions": [],
         "tables": [],
-        "kv_tables": {"kvtable1": {
-            "type": "kvaccount1",
-            "primary_index": {"name": "pid1", "type": "name"},
-            "secondary_indices": {"sid1": {"type": "string"}}
-           }},
+        "kv_tables": {
+            "kvtable1": {
+                "type": "kvaccount1",
+                "primary_index": {"name": "pida", "type": "name"},
+                "secondary_indices": {
+                    "sid1": {"type": "string"},
+                    "sid2": {"type": "uint32"},
+                    "sid3": {"type": "name"}
+                }
+            },
+            "kvtable2": {
+                "type": "kvaccount2",
+                "primary_index": {"name": "pidb", "type": "name"},
+                "secondary_indices": {
+                    "sida": {"type": "int32"},
+                    "sidb": {"type": "uint64"},
+                    "sidc": {"type": "sha256"}
+                }
+            }
+
+        },
        "ricardian_clauses": [],
        "abi_extensions": []
       }
@@ -124,14 +140,20 @@ BOOST_AUTO_TEST_CASE(setabi_test)
 
    auto var = fc::json::from_string(abi_string);
    auto abi = var.as<abi_def>();
-   
-   abi_serializer abis(abi, abi_serializer::create_yield_function( max_serialization_time ));
-   auto var2 = verify_byte_round_trip_conversion( abis, "abi_def", var );
-   auto abi2 = var2.as<abi_def>();
+
+   variant v;
+   eosio::chain::kv_tables_as_object<map<name, kv_table_def>> o;
+   //to_variant(abi, v);
+   //from_variant(v, o);
+
+   //abi_serializer abis(abi, abi_serializer::create_yield_function(max_serialization_time));
+   //auto var2 = verify_byte_round_trip_conversion( abis, "abi_def", var );
+   //auto abi2 = var2.as<abi_def>();
 
    std::cout << "========================="<< std::endl;
+ /*
    BOOST_TEST_REQUIRE(1u == abi.types.size());
-/*
+
    BOOST_TEST("account_name" == abi.types[0].new_type_name);
    BOOST_TEST("name" == abi.types[0].type);
 
@@ -173,28 +195,46 @@ BOOST_AUTO_TEST_CASE(setabi_test)
    BOOST_TEST("account" == abi.tables[0].key_names[0]);
    BOOST_TEST_REQUIRE(1u == abi.tables[0].key_types.size());
    BOOST_TEST("name" == abi.tables[0].key_types[0]);
+*/
+
+   //BOOST_TEST_REQUIRE(2u == abi.kv_tables.value.size());
+
+   name tbl_name = name("kvtable1");
 
 
-   BOOST_TEST_REQUIRE(2u == abi.kv_tables.size());
+   bool test =  abi.kv_tables.value.end() != abi.kv_tables.value.find(tbl_name);
+   std::cout << "test = " << test << std::endl;
+   BOOST_TEST(test);
+
+   test = ("pida" == abi.kv_tables.value[tbl_name].primary_index.name.to_string());
+   BOOST_TEST(test);
+
+   test = ("name" == abi.kv_tables.value[tbl_name].primary_index.type);
+   BOOST_TEST(test);
+
+   test = (3u == abi.kv_tables.value[tbl_name].secondary_indices.size());
+   BOOST_TEST(test);
+
+   test = ("string" == abi.kv_tables.value[tbl_name].secondary_indices[name("sid1")].type);
+   BOOST_TEST(test);
+/*
+   BOOST_TEST("uint32" == abi.kv_tables.value[tbl_name].secondary_indices[name("sid2")].type);
+   BOOST_TEST("name" == abi.kv_tables.value[tbl_name].secondary_indices[name("sid3")].type);
+
+
+   tbl_name = name("kvtable2");
+
+   BOOST_TEST( abi.kv_tables.value.end() != abi.kv_tables.value.find(tbl_name));
+   BOOST_TEST("pidb" == abi.kv_tables.value[tbl_name].primary_index.name);
+   BOOST_TEST("name" == abi.kv_tables.value[tbl_name].primary_index.type);
+   BOOST_TEST_REQUIRE(3u == abi.kv_tables.value[tbl_name].secondary_indices.size());
+
+   BOOST_TEST("int32" == abi.kv_tables.value[tbl_name].secondary_indices[name("sida")].type);
+   BOOST_TEST("uint64" == abi.kv_tables.value[tbl_name].secondary_indices[name("sidb")].type);
+   BOOST_TEST("sha256" == abi.kv_tables.value[tbl_name].secondary_indices[name("sidc")].type);
    */
-   //BOOST_TEST( abi.kv_tables.end() != abi.kv_tables.find(name("kvaccount1")));
-   //BOOST_TEST("pid1" == abi.kv_tables["kvaccount1"].primary_index.name);
-   //BOOST_TEST("name" == abi.kv_tables["kvaccount1"].primary_index.type);
-   //BOOST_TEST_REQUIRE(6u == abi.kv_tables[0].secondary_indices.size());
-   /*
-   BOOST_TEST("string" == abi.kv_tables[0].secondary_indices["sid1"].type);
-   BOOST_TEST("uint64" == abi.kv_tables[0].secondary_indices["sid2"]].type);
-   BOOST_TEST("uint32" == abi.kv_tables[0].secondary_indices["sid3"].type);
-   BOOST_TEST("tuple_string_bool" == abi.kv_tables[0].secondary_indices["sid4"].type);
-   BOOST_TEST("int32[]" == abi.kv_tables[0].secondary_indices["sid5"].type);
-   BOOST_TEST("uint64[]" == abi.kv_tables[0].secondary_indices["sid6"].type);
-  */
 
-   //BOOST_TEST( abi.kv_tables.end() != abi.kv_tables.find(name("kvaccount2")));
-   //BOOST_TEST("pid2" == abi.kv_tables["kvaccount2"].primary_index.name);
-   //BOOST_TEST("string" == abi.kv_tables["kvaccount2"].primary_index.type);
-   //BOOST_TEST_REQUIRE(4u == abi.kv_tables[1].secondary_indices.size());
-
+   std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
 } FC_LOG_AND_RETHROW() }
 
 struct action1 {

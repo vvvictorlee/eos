@@ -139,7 +139,7 @@ private:
    map<type_name, struct_def, std::less<>>    structs;
    map<name,type_name>                        actions;
    map<name,type_name>                        tables;
-   map<std::string, kv_table_def>             kv_tables;
+   map<name, kv_table_def>                    kv_tables;
    map<uint64_t, std::string>                 error_messages;
    map<type_name, variant_def, std::less<>>   variants;
    map<name,type_name>                        action_results;
