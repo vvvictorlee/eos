@@ -97,7 +97,7 @@ class kv_tester : public tester {
    }
 
    action_result set_kv_limits(uint32_t klimit, uint32_t vlimit, uint32_t ilimit = 256) {
-      string action_type_name = sys_abi_ser.get_action_type(N(setramlimit));
+      string action_type_name = sys_abi_ser.get_action_type(N(ramkvlimits));
       action act;
       act.account = config::system_account_name;
       act.name    = N(ramkvlimits);
@@ -746,7 +746,7 @@ BOOST_FIXTURE_TEST_CASE(kv_key_value_limit, kv_tester) try { //
 }
 FC_LOG_AND_RETHROW()
 
-constexpr name databases[] = { N(eosio.kvdisk) };
+constexpr name databases[] = { N(eosio.kvram) };
 
 BOOST_DATA_TEST_CASE_F(kv_tester, kv_inc_dec_usage, bdata::make(databases), db) try { //
    test_kv_inc_dec_usage();
@@ -868,13 +868,13 @@ static const char kv_setup_wast[] =  R"=====(
 (module
  (func $action_data_size (import "env" "action_data_size") (result i32))
  (func $read_action_data (import "env" "read_action_data") (param i32 i32) (result i32))
- (func $kv_set_parameters_packed (import "env" "set_kv_parameters_packed") (param i64 i32 i32))
+ (func $kv_set_parameters_packed (import "env" "set_kv_parameters_packed") (param i32 i32))
  (func $set_resource_limit (import "env" "set_resource_limit") (param i64 i64 i64))
  (memory 1)
  (func (export "apply") (param i64 i64 i64)
    (local $next_name_address i32)
    (local $bytes_remaining i32)
-   (call $kv_set_parameters_packed (get_local 2) (i32.const 0) (i32.const 16))
+   (call $kv_set_parameters_packed (i32.const 0) (i32.const 16))
    (set_local $next_name_address (i32.const 16))
    (set_local $bytes_remaining (call $action_data_size))
    (if
@@ -882,7 +882,7 @@ static const char kv_setup_wast[] =  R"=====(
       (then
          (drop (call $read_action_data (get_local $next_name_address) (get_local $bytes_remaining)))
          (loop
-            (call $set_resource_limit (i64.load (get_local $next_name_address)) (i64.const 5454140623722381312) (i64.const -1))            
+            (call $set_resource_limit (i64.load (get_local $next_name_address)) (i64.const 13376816793197215744) (i64.const -1))            
             (set_local $bytes_remaining (i32.sub (get_local $bytes_remaining) (i32.const 8)))
             (set_local $next_name_address (i32.add (get_local $next_name_address) (i32.const 8)))
             (br_if 0 (i32.ge_s (get_local $bytes_remaining) (i32.const 8)))
@@ -915,18 +915,18 @@ std::vector<char> construct_names_payload( std::vector<name> names ) {
 // - access checking for write
 static const char kv_notify_wast[] = R"=====(
 (module
- (func $kv_it_create (import "env" "kv_it_create") (param i64 i64 i32 i32) (result i32))
+ (func $kv_it_create (import "env" "kv_it_create") (param i64 i32 i32) (result i32))
  (func $kv_it_destroy (import "env" "kv_it_destroy") (param i32))
- (func $kv_get (import "env" "kv_get") (param i64 i64 i32 i32 i32) (result i32))
- (func $kv_set (import "env" "kv_set") (param i64 i64 i32 i32 i32 i32 i64) (result i64))
+ (func $kv_get (import "env" "kv_get") (param i64 i32 i32 i32) (result i32))
+ (func $kv_set (import "env" "kv_set") (param i64 i32 i32 i32 i32 i64) (result i64))
  (func $require_recipient (import "env" "require_recipient") (param i64))
  (memory 1)
  (func (export "apply") (param i64 i64 i64)
-  (drop (call $kv_it_create (get_local 2) (get_local 0) (i32.const 0) (i32.const 0)))
-  (drop (call $kv_it_create (get_local 2) (get_local 0) (i32.const 0) (i32.const 0)))
+  (drop (call $kv_it_create (get_local 0) (i32.const 0) (i32.const 0)))
+  (drop (call $kv_it_create (get_local 0) (i32.const 0) (i32.const 0)))
   (call $kv_it_destroy (i32.const 2))
-  (drop (call $kv_set (get_local 2) (get_local 0) (i32.const 0) (i32.const 0) (i32.const 1) (i32.const 1)  (get_local 0)))
-  (drop (call $kv_get (get_local 2) (get_local 0) (i32.const 0) (i32.const 0) (i32.const 8)))
+  (drop (call $kv_set (get_local 0) (i32.const 0) (i32.const 0) (i32.const 1) (i32.const 1)  (get_local 0)))
+  (drop (call $kv_get (get_local 0) (i32.const 0) (i32.const 0) (i32.const 8)))
   (call $require_recipient (i64.const 11327368596746665984))
  )
 )
@@ -934,15 +934,15 @@ static const char kv_notify_wast[] = R"=====(
 
 static const char kv_notified_wast[] = R"=====(
 (module
- (func $kv_it_create (import "env" "kv_it_create")(param i64 i64 i32 i32) (result i32))
- (func $kv_get_data (import "env" "kv_get_data") (param i64 i32 i32 i32) (result i32))
- (func $kv_set (import "env" "kv_set") (param i64 i64 i32 i32 i32 i32 i64) (result i64))
+ (func $kv_it_create (import "env" "kv_it_create")(param i64 i32 i32) (result i32))
+ (func $kv_get_data (import "env" "kv_get_data") (param i32 i32 i32) (result i32))
+ (func $kv_set (import "env" "kv_set") (param i64 i32 i32 i32 i32 i64) (result i64))
  (func $eosio_assert (import "env" "eosio_assert") (param i32 i32))
  (memory 1)
  (func (export "apply") (param i64 i64 i64)
-  (call $eosio_assert (i32.eq (call $kv_it_create (get_local 2) (get_local 0) (i32.const 0) (i32.const 0)) (i32.const 1)) (i32.const 80))
-  (call $eosio_assert (i32.eq (call $kv_get_data (get_local 2) (i32.const 0) (i32.const 0) (i32.const 0)) (i32.const 0)) (i32.const 160))
-  (drop (call $kv_set (get_local 2) (get_local 0) (i32.const 0) (i32.const 0) (i32.const 1) (i32.const 1) (get_local 0)))
+  (call $eosio_assert (i32.eq (call $kv_it_create (get_local 0) (i32.const 0) (i32.const 0)) (i32.const 1)) (i32.const 80))
+  (call $eosio_assert (i32.eq (call $kv_get_data (i32.const 0) (i32.const 0) (i32.const 0)) (i32.const 0)) (i32.const 160))
+  (drop (call $kv_set (get_local 0) (i32.const 0) (i32.const 0) (i32.const 1) (i32.const 1) (get_local 0)))
  )
  (data (i32.const 80) "Wrong iterator value")
  (data (i32.const 160) "Temporary data buffer not empty")
@@ -964,21 +964,21 @@ BOOST_DATA_TEST_CASE_F(tester, notify, bdata::make(databases), db) {
 // Check corner cases of alias checks for the kv_set and kv_get intrinsics
 static const char kv_alias_pass_wast[] = R"=====(
 (module
- (func $kv_get (import "env" "kv_get") (param i64 i64 i32 i32 i32) (result i32))
- (func $kv_set (import "env" "kv_set") (param i64 i64 i32 i32 i32 i32 i64) (result i64))
+ (func $kv_get (import "env" "kv_get") (param i64 i32 i32 i32) (result i32))
+ (func $kv_set (import "env" "kv_set") (param i64 i32 i32 i32 i32 i64) (result i64))
  (memory 1)
  (func (export "apply") (param i64 i64 i64)
-  (drop (call $kv_set (get_local 2) (get_local 0) (i32.const 0) (i32.const 0) (i32.const 0) (i32.const 1) (get_local 0)))
-  (drop (call $kv_set (get_local 2) (get_local 0) (i32.const 0) (i32.const 1) (i32.const 0) (i32.const 0) (get_local 0)))
-  (drop (call $kv_set (get_local 2) (get_local 0) (i32.const 0) (i32.const 1) (i32.const 1) (i32.const 0) (get_local 0)))
-  (drop (call $kv_set (get_local 2) (get_local 0) (i32.const 1) (i32.const 0) (i32.const 0) (i32.const 1) (get_local 0)))
-  (drop (call $kv_set (get_local 2) (get_local 0) (i32.const 0) (i32.const 2) (i32.const 1) (i32.const 0) (get_local 0)))
-  (drop (call $kv_set (get_local 2) (get_local 0) (i32.const 1) (i32.const 0) (i32.const 0) (i32.const 2) (get_local 0)))
-  (drop (call $kv_get (get_local 2) (get_local 0) (i32.const 1) (i32.const 1) (i32.const 2)))
-  (drop (call $kv_get (get_local 2) (get_local 0) (i32.const 2) (i32.const 0) (i32.const 2)))
-  (drop (call $kv_get (get_local 2) (get_local 0) (i32.const 6) (i32.const 1) (i32.const 2)))
-  (drop (call $kv_get (get_local 2) (get_local 0) (i32.const 6) (i32.const 0) (i32.const 2)))
-  (drop (call $kv_get (get_local 2) (get_local 0) (i32.const 4) (i32.const 0) (i32.const 2)))
+  (drop (call $kv_set (get_local 0) (i32.const 0) (i32.const 0) (i32.const 0) (i32.const 1) (get_local 0)))
+  (drop (call $kv_set (get_local 0) (i32.const 0) (i32.const 1) (i32.const 0) (i32.const 0) (get_local 0)))
+  (drop (call $kv_set (get_local 0) (i32.const 0) (i32.const 1) (i32.const 1) (i32.const 0) (get_local 0)))
+  (drop (call $kv_set (get_local 0) (i32.const 1) (i32.const 0) (i32.const 0) (i32.const 1) (get_local 0)))
+  (drop (call $kv_set (get_local 0) (i32.const 0) (i32.const 2) (i32.const 1) (i32.const 0) (get_local 0)))
+  (drop (call $kv_set (get_local 0) (i32.const 1) (i32.const 0) (i32.const 0) (i32.const 2) (get_local 0)))
+  (drop (call $kv_get (get_local 0) (i32.const 1) (i32.const 1) (i32.const 2)))
+  (drop (call $kv_get (get_local 0) (i32.const 2) (i32.const 0) (i32.const 2)))
+  (drop (call $kv_get (get_local 0) (i32.const 6) (i32.const 1) (i32.const 2)))
+  (drop (call $kv_get (get_local 0) (i32.const 6) (i32.const 0) (i32.const 2)))
+  (drop (call $kv_get (get_local 0) (i32.const 4) (i32.const 0) (i32.const 2)))
  )
 )
 )=====";
@@ -986,8 +986,8 @@ static const char kv_alias_pass_wast[] = R"=====(
 static const char kv_alias_general_wast[] = R"=====(
 (module
  (func $read_action_data (import "env" "read_action_data") (param i32 i32) (result i32))
- (func $kv_get (import "env" "kv_get") (param i64 i64 i32 i32 i32) (result i32))
- (func $kv_set (import "env" "kv_set") (param i64 i64 i32 i32 i32 i32 i64) (result i64))
+ (func $kv_get (import "env" "kv_get") (param i64 i32 i32 i32) (result i32))
+ (func $kv_set (import "env" "kv_set") (param i64 i32 i32 i32 i32 i64) (result i64))
  (memory 1)
  (func (export "apply") (param i64 i64 i64)
   (local $span_start i32)
@@ -995,9 +995,9 @@ static const char kv_alias_general_wast[] = R"=====(
   (drop (call $read_action_data (i32.const 0) (i32.const 8)))
   (set_local $span_start (i32.load (i32.const 0)))
   (set_local $span_size  (i32.load (i32.const 4)))
-  (drop (call $kv_get (get_local 2) (get_local 0) (get_local $span_start) (get_local $span_size) (i32.const 32)))
-  (drop (call $kv_set (get_local 2) (get_local 0) (i32.const 64) (i32.const 4) (get_local $span_start) (get_local $span_size) (get_local 0)))
-  (drop (call $kv_set (get_local 2) (get_local 0) (get_local $span_start) (get_local $span_size) (i32.const 128) (i32.const 4) (get_local 0)))
+  (drop (call $kv_get (get_local 0) (get_local $span_start) (get_local $span_size) (i32.const 32)))
+  (drop (call $kv_set (get_local 0) (i32.const 64) (i32.const 4) (get_local $span_start) (get_local $span_size) (get_local 0)))
+  (drop (call $kv_set (get_local 0) (get_local $span_start) (get_local $span_size) (i32.const 128) (i32.const 4) (get_local 0)))
  )
 )
 )=====";
